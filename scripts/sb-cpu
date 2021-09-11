@@ -1,11 +1,9 @@
 #!/bin/sh
 
 case $BUTTON in
-	1) notify-send "🖥 CPU hogs" "$(ps axch -o cmd:15,%cpu --sort=-%cpu | head)\\n(100% per core)" ;;
+	1) notify-send -h string:x-dunst-stack-tag:cpu_block " CPU hogs" "$(ps axch -o cmd:15,%cpu --sort=-%cpu | head)\\n(100% per core)" ;;
 	2) setsid -f "$TERMINAL" -e htop ;;
-	3) notify-send "🖥 CPU module " "\- Shows CPU usage.
-- Click to show intensive processes.
-- Middle click to open htop." ;;
+	3) notify-send -h string:x-dunst-stack-tag:cpu_block " CPU module " "\- Shows CPU usage.\n- Click to show intensive processes.\n- Middle click to open htop." ;;
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
