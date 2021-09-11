@@ -3,6 +3,7 @@
 #include<string.h>
 #include<unistd.h>
 #include<signal.h>
+#include<errno.h>
 #include<sys/wait.h>
 #ifndef NO_X
 #include<X11/Xlib.h>
@@ -32,6 +33,7 @@ void getcmds(int time);
 void getsigcmds(unsigned int signal);
 void setupsignals();
 void sighandler(int signum, siginfo_t *si, void *ucontext);
+void remove_all(char *str, char to_remove);
 int getstatus(char *str, char *last);
 void statusloop();
 void termhandler();
@@ -56,31 +58,57 @@ static char statusstr[2][STATUSLENGTH];
 static int statusContinue = 1;
 static int returnStatus = 0;
 
+void remove_all(char *str, char to_remove) {
+	char *read = str;
+	char *write = str;
+	while (*read) {
+		if (*read != to_remove) {
+			*write++ = *read;
+		}
+		++read;
+	}
+	*write = '\0';
+}
+
 //opens process *cmd and stores output in *output
 void getcmd(const Block *block, char *output)
 {
 	if (block->signal)
-		*output++ = block->signal;
-	strcpy(output, block->icon);
-	FILE *cmdf = popen(block->command, "r");
-	if (!cmdf)
-		return;
-	int i = strlen(block->icon);
-	fgets(output+i, CMDLENGTH-i-delimLen, cmdf);
-	i = strlen(output);
-	if (i == 0) {
-		//return if block and command output are both empty
-		pclose(cmdf);
-		return;
+	{
+		output[0] = block->signal;
+		output++;
 	}
-	if (delim[0] != '\0') {
-		//only chop off newline if one is present at the end
-		i = output[i-1] == '\n' ? i-1 : i;
-		strncpy(output+i, delim, delimLen); 
-	}
-	else
-		output[i++] = '\0';
+	char *cmd = block->command;
+	FILE *cmdf = popen(cmd,"r");
+	if (!cmdf){
+        //printf("failed to run: %s, %d\n", block->command, errno);
+		return;
+    }
+    char tmpstr[CMDLENGTH] = "";
+    // TODO decide whether its better to use the last value till next time or just keep trying while the error was the interrupt
+    // this keeps trying to read if it got nothing and the error was an interrupt
+    //  could also just read to a separate buffer and not move the data over if interrupted
+    //  this way will take longer trying to complete 1 thing but will get it done
+    //  the other way will move on to keep going with everything and the part that failed to read will be wrong till its updated again
+    // either way you have to save the data to a temp buffer because when it fails it writes nothing and then then it gets displayed before this finishes
+	char * s;
+    int e;
+    do {
+        errno = 0;
+        s = fgets(tmpstr, CMDLENGTH-(strlen(delim)+1), cmdf);
+        e = errno;
+    } while (!s && e == EINTR);
 	pclose(cmdf);
+	int i = strlen(block->icon);
+	strcpy(output, block->icon);
+    strcpy(output+i, tmpstr);
+	remove_all(output, '\n');
+	i = strlen(output);
+    if ((i > 0 && block != &blocks[LENGTH(blocks) - 1])){
+        strcat(output, delim);
+    }
+    i+=strlen(delim);
+	output[i++] = '\0';
 }
 
 void getcmds(int time)
