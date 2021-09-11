@@ -153,9 +153,12 @@ int getstatus(char *str, char *last)
 {
 	strcpy(last, str);
 	str[0] = '\0';
-	for (unsigned int i = 0; i < LENGTH(blocks); i++)
+    for(int i = 0; i < LENGTH(blocks); i++) {
 		strcat(str, statusbar[i]);
-	str[strlen(str)-strlen(delim)] = '\0';
+        if (i == LENGTH(blocks) - 1)
+            strcat(str, " ");
+    }
+	str[strlen(str)-1] = '\0';
 	return strcmp(str, last);//0 if they are the same
 }
 
