@@ -19,7 +19,8 @@
 
 case $BUTTON in
 	2) setsid -w -f "$TERMINAL" -e yay ;;
-	1) notify-send -h string:x-dunst-stack-tag:pac_block "$(/usr/bin/pacman -Qu)" ;;
+	1) notify-send -h string:x-dunst-stack-tag:pac_block ": Packages
+$(/usr/bin/pacman -Qu)" ;;
 	3) notify-send -h string:x-dunst-stack-tag:pac_block " Upgrade module" ": number of upgradable packages
 - Left click to upgrade packages
 - Middle click to show upgradable packages" ;;
