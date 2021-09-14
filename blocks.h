@@ -6,6 +6,7 @@ static const Block blocks[] = {
 	/*Icon*/	/*Command*/		/*Update Interval*/	/*Update Signal*/
 	{ "", PATH("sb-cpu"),           1, 4 },
 	{ "", PATH("sb-memory"),        1, 3 },
+	{ "", PATH("sb-ip"),          360, 6 },
 	{ "", PATH("sb-pacpackages"), 360, 5 },
 	{ "", PATH("sb-volume"),        0, 2 },
 	{ "", PATH("sb-clock"),         1, 1 },
