@@ -7,5 +7,5 @@ case $BUTTON in
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-cat <(grep 'cpu ' /proc/stat) <(sleep .01 && grep 'cpu ' /proc/stat) | awk -v RS="" '{printf ":%5.1f%%", ($13-$2+$15-$4)*100/($13-$2+$15-$4+$16-$5)}'
+cat <(grep 'cpu ' /proc/stat) <(sleep .2 && grep 'cpu ' /proc/stat) | awk -v RS="" '{printf ":%5.1f%%", ($13-$2+$15-$4)*100/($13-$2+$15-$4+$16-$5)}'
 #top -b -n2 -p 1 | fgrep "Cpu(s)" | tail -1 | awk -F'id,' -v prefix="$prefix" '{ split($1, vs, ","); v=vs[length(vs)]; sub("%", "", v); printf ": %s%.1f%%\n", prefix, 100 - v }'

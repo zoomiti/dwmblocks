@@ -9,14 +9,20 @@ else
   addr=`cat /tmp/addr.dat`
 fi
 
+ip addr | grep inet | grep -v inet6 > /tmp/ips.dat
+if [ $addr -gt $(cat /tmp/ips.dat | wc -l) ];
+then
+	addr=1;
+fi;
+
 case $BUTTON in
-	1) notify-send -h string:x-dunst-stack-tag:ip-block " IP module" "$(ip addr | grep inet | grep -v inet6 | awk '{printf "%s %s\n", $2, $NF}' | sed 's/\/\S*//')" ;;
+	1) notify-send -h string:x-dunst-stack-tag:ip-block " IP module" "$(cat /tmp/ips.dat | awk '{printf "%s %s\n", $2, $NF}' | sed 's/\/\S*//')" ;;
 	3) notify-send -h string:x-dunst-stack-tag:ip-block " IP module" "\- Shows the ip address of each device
 - Click to see all devices
 - Scroll to cycle between devices" ;;
-	4) addr=$(($addr +  1)) ; if [ $addr == 4 ]; then addr=1;fi; echo "${addr}" > /tmp/addr.dat ;;
-	5) addr=$(($addr + -1)) ; if [ $addr == 0 ]; then addr=3;fi; echo "${addr}" > /tmp/addr.dat ;;
+	4) addr=$(($addr +  1)) ; if [ $addr -gt $(cat /tmp/ips.dat | wc -l) ]; then addr=1;fi; echo "${addr}" > /tmp/addr.dat ;;
+	5) addr=$(($addr + -1)) ; if [ $addr -lt 1 ]; then addr=$(cat /tmp/ips.dat | wc -l);fi; echo "${addr}" > /tmp/addr.dat ;;
 	6) "$TERMINAL" -e "$EDITOR" "$0" ;;
 esac
 
-ip addr | grep inet | grep -v inet6 | awk -v line=${addr} 'NR==line{printf " %s %s", $2, $NF}' | sed 's/\/\S*//'
+cat /tmp/ips.dat | awk -v line=${addr} 'NR==line{printf " %s %s", $2, $NF}' | sed 's/\/\S*//';rm /tmp/ips.dat
